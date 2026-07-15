@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fi';
 
 function App() {
-  const [allData, setAllData] = useState({ 2021: [], 2022: [], 2023: [], 2024: [], 2025: [] });
+  const [allData, setAllData] = useState({ 2021: null, 2022: null, 2023: null, 2024: null, 2025: null });
   const [selectedYear, setSelectedYear] = useState(2025);
   const [searchInputValue, setSearchInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,7 +23,7 @@ function App() {
   const [sortBy, setSortBy] = useState('indeks-desc');
   const [selectedItem, setSelectedItem] = useState(null);
   const [showCompare, setShowCompare] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [yearLoading, setYearLoading] = useState(false);
   const [showDownloadDropdown, setShowDownloadDropdown] = useState(false);
 
   // Debounce search query
@@ -39,33 +39,41 @@ function App() {
   const [pageSize, setPageSize] = useState(25);
   const [pageInputValue, setPageInputValue] = useState('1');
 
-  // Load Data
+  // Fetch a single year lazily and cache it
+  const fetchYear = async (year) => {
+    try {
+      const res = await fetch(`/${year}.json`);
+      const data = await res.json();
+      setAllData(prev => ({ ...prev, [year]: data }));
+      return data;
+    } catch (err) {
+      console.error(`Gagal mengambil data SPI ${year}:`, err);
+      setAllData(prev => ({ ...prev, [year]: [] }));
+      return [];
+    }
+  };
+
+  // Load on selected year change (lazy)
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [res2021, res2022, res2023, res2024, res2025] = await Promise.all([
-          fetch('/2021.json').then(r => r.json()),
-          fetch('/2022.json').then(r => r.json()),
-          fetch('/2023.json').then(r => r.json()),
-          fetch('/2024.json').then(r => r.json()),
-          fetch('/2025.json').then(r => r.json())
-        ]);
-        setAllData({
-          2021: res2021,
-          2022: res2022,
-          2023: res2023,
-          2024: res2024,
-          2025: res2025
-        });
-      } catch (err) {
-        console.error('Gagal mengambil data SPI:', err);
-      } finally {
-        setLoading(false);
+    const load = async () => {
+      if (selectedYear === 'all') {
+        // Fetch all uncached years in parallel
+        const years = [2021, 2022, 2023, 2024, 2025];
+        const missing = years.filter(y => allData[y] === null);
+        if (missing.length === 0) return;
+        setYearLoading(true);
+        await Promise.all(missing.map(fetchYear));
+        setYearLoading(false);
+      } else {
+        if (allData[selectedYear] !== null) return; // already cached
+        setYearLoading(true);
+        await fetchYear(selectedYear);
+        setYearLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear]);
 
   // Current selected data (supports 'all' to merge all years)
   const currentYearData = useMemo(() => {
@@ -172,7 +180,7 @@ function App() {
   }, [searchQuery, selectedLevel, selectedYear, sortBy, pageSize]);
 
   // Export to Excel with custom year/mode choices
-  const handleExport = (exportOption) => {
+  const handleExport = async (exportOption) => {
     let rawData = [];
     let fileName = '';
     let sheetName = '';
@@ -182,17 +190,22 @@ function App() {
       fileName = `Data_SPI_Terfilter_Export.xlsx`;
       sheetName = 'Terfilter';
     } else if (exportOption === 'all') {
-      rawData = [
-        ...(allData[2021] || []),
-        ...(allData[2022] || []),
-        ...(allData[2023] || []),
-        ...(allData[2024] || []),
-        ...(allData[2025] || [])
-      ];
+      // Fetch any uncached years first
+      const years = [2021, 2022, 2023, 2024, 2025];
+      const missing = years.filter(y => allData[y] === null);
+      const fetched = await Promise.all(missing.map(fetchYear));
+      // merge cached + freshly fetched
+      const merged = years.map((y, i) => {
+        const missingIdx = missing.indexOf(y);
+        return missingIdx >= 0 ? fetched[missingIdx] : (allData[y] || []);
+      });
+      rawData = merged.flat();
       fileName = 'Data_SPI_Semua_Tahun_Export.xlsx';
       sheetName = 'Semua Tahun';
     } else {
-      rawData = allData[exportOption] || [];
+      // Fetch if not yet cached
+      const cached = allData[exportOption];
+      rawData = cached !== null ? cached : await fetchYear(exportOption);
       fileName = `Data_SPI_Tahun_${exportOption}_Export.xlsx`;
       sheetName = `Tahun ${exportOption}`;
     }
@@ -335,10 +348,57 @@ function App() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center p-20">
-          <div className="w-10 h-10 border-3 border-slate-100 border-t-violet-600 rounded-full animate-spin"></div>
-          <span className="font-semibold text-slate-400 mt-4 text-sm">Menghubungkan ke basis data...</span>
+      {yearLoading ? (
+        /* ── Skeleton Loading UI ─────────────────────────────────── */
+        <div className="animate-pulse">
+          {/* Skeleton year select */}
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-5 mb-8">
+            <div className="h-3 w-28 bg-slate-100 rounded-full"></div>
+            <div className="h-8 w-40 bg-slate-100 rounded-xl"></div>
+          </div>
+
+          {/* Skeleton metric cards — hidden on mobile */}
+          <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col gap-3">
+                <div className="h-3 w-16 bg-slate-200 rounded-full"></div>
+                <div className="h-8 w-24 bg-slate-200 rounded-xl"></div>
+                <div className="h-2 w-32 bg-slate-100 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Skeleton mobile metric card */}
+          <div className="block sm:hidden bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100">
+            <div className="grid grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex flex-col gap-2 py-2">
+                  <div className="h-2 w-16 bg-slate-200 rounded-full"></div>
+                  <div className="h-6 w-20 bg-slate-200 rounded-lg"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skeleton search + filter bar */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="h-10 flex-1 bg-slate-100 rounded-xl"></div>
+            <div className="h-10 w-36 bg-slate-100 rounded-xl"></div>
+            <div className="h-10 w-36 bg-slate-100 rounded-xl"></div>
+          </div>
+
+          {/* Skeleton table */}
+          <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+            <div className="h-10 bg-slate-50 border-b border-slate-100"></div>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-5 py-3.5 border-b border-slate-50 last:border-0">
+                <div className="h-3 w-6 bg-slate-100 rounded-full shrink-0"></div>
+                <div className="h-3 flex-1 bg-slate-100 rounded-full"></div>
+                <div className="h-5 w-16 bg-slate-100 rounded-lg shrink-0 hidden sm:block"></div>
+                <div className="h-6 w-14 bg-slate-100 rounded-lg shrink-0"></div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <>
