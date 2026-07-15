@@ -13,6 +13,49 @@ import {
   FiEye
 } from 'react-icons/fi';
 
+// ── Click-to-Expand / Release-to-Collapse Components ─────────────────────────
+function ExpandableTableCell({ nama }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  return (
+    <td 
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsExpanded(!isExpanded);
+      }}
+      onMouseLeave={() => setIsExpanded(false)}
+      className={`py-2.5 sm:py-3.5 px-2.5 sm:px-5 font-bold text-slate-800 cursor-pointer select-none transition-all ${
+        isExpanded 
+          ? 'max-w-none break-words whitespace-normal bg-violet-50/50 ring-1 ring-violet-100 rounded-lg shadow-inner' 
+          : 'max-w-[120px] sm:max-w-sm truncate'
+      }`}
+      title={nama}
+    >
+      {nama}
+    </td>
+  );
+}
+
+function ExpandableText({ text, className = '' }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  return (
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsExpanded(!isExpanded);
+      }}
+      onMouseLeave={() => setIsExpanded(false)}
+      className={`cursor-pointer select-none transition-all block ${
+        isExpanded 
+          ? 'max-w-none whitespace-normal break-words bg-slate-100 px-1 py-0.5 rounded text-[9px] text-slate-700 font-semibold shadow-xs' 
+          : 'truncate max-w-full'
+      } ${className}`}
+      title={text}
+    >
+      {text}
+    </span>
+  );
+}
+
 function App() {
   const [allData, setAllData] = useState({ 2021: null, 2022: null, 2023: null, 2024: null, 2025: null });
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -291,9 +334,9 @@ function App() {
         <div className="relative">
           <button 
             onClick={() => setShowDownloadDropdown(!showDownloadDropdown)}
-            className="text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 border border-violet-100 cursor-pointer shadow-xs"
+            className="text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl transition-all flex items-center gap-1.5 border border-violet-100 cursor-pointer shadow-xs"
           >
-            <FiDownload className="w-3.5 h-3.5" /> Unduh Laporan
+            <FiDownload className="w-3.5 h-3.5" /> Unduh<span className="hidden sm:inline"> Laporan</span>
           </button>
           
           {/* Download Selector Dropdown */}
@@ -448,22 +491,22 @@ function App() {
           {/* Mobile Metrics Card (Single Card, 2x2 grid for mobile) */}
           <div className="block sm:hidden bg-white border border-slate-100 rounded-2xl p-4 mb-6 shadow-xs">
             <div className="grid grid-cols-2 gap-4">
-              <div className="border-r border-b border-slate-100/50 pb-3 pr-2 text-left">
+              <div className="min-w-0 border-r border-b border-slate-100/50 pb-3 pr-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Indeks Rata-Rata</span>
                 <span className="text-lg font-extrabold text-slate-800">📈 {stats.avg}</span>
                 <span className="text-[8px] font-medium text-slate-400 block mt-0.5 truncate">Total: {stats.total} data</span>
               </div>
-              <div className="border-b border-slate-100/50 pb-3 pl-2 text-left">
+              <div className="min-w-0 border-b border-slate-100/50 pb-3 pl-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Skor Tertinggi</span>
                 <span className="text-lg font-extrabold text-emerald-600">🏆 {stats.highest?.indeks || 0}</span>
-                <span className="text-[8px] font-medium text-slate-400 block mt-0.5 truncate max-w-full" title={stats.highest?.nama}>{stats.highest?.nama}</span>
+                <ExpandableText text={stats.highest?.nama || ''} className="text-[8px] font-medium text-slate-400" />
               </div>
-              <div className="border-r border-slate-100/50 pt-3 pr-2 text-left">
+              <div className="min-w-0 border-r border-slate-100/50 pt-3 pr-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Skor Terendah</span>
                 <span className="text-lg font-extrabold text-rose-600">🚧 {stats.lowest?.indeks || 0}</span>
-                <span className="text-[8px] font-medium text-slate-400 block mt-0.5 truncate max-w-full" title={stats.lowest?.nama}>{stats.lowest?.nama}</span>
+                <ExpandableText text={stats.lowest?.nama || ''} className="text-[8px] font-medium text-slate-400" />
               </div>
-              <div className="pt-3 pl-2 text-left">
+              <div className="min-w-0 pt-3 pl-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Lembaga</span>
                 <span className="text-lg font-extrabold text-violet-600">🏛️ {stats.total}</span>
                 <span className="text-[8px] font-medium text-slate-400 block mt-0.5">Kementerian & Pemda</span>
@@ -636,12 +679,12 @@ function App() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                    <th className="py-4 px-5 w-12 text-center">No.</th>
-                    <th className="py-4 px-5 w-20 text-center hidden sm:table-cell">Tahun</th>
-                    <th className="py-4 px-5">Nama Instansi / Lembaga</th>
-                    <th className="py-4 px-5 w-40 hidden sm:table-cell">Kategori</th>
-                    <th className="py-4 px-5 w-32 text-center">Skor SPI</th>
-                    <th className="py-4 px-5 w-28 text-center">Aksi</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5 w-10 sm:w-12 text-center">No.</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5 w-20 text-center hidden sm:table-cell">Tahun</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5">Nama Instansi / Lembaga</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5 w-40 hidden sm:table-cell">Kategori</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5 w-20 sm:w-32 text-center">Skor SPI</th>
+                    <th className="py-3 sm:py-4 px-2.5 sm:px-5 w-20 sm:w-28 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-sm text-slate-700">
@@ -659,23 +702,21 @@ function App() {
                           key={`${item.instansi_id || item.nama}-${index}`} 
                           className="hover:bg-slate-50/40 transition-colors"
                         >
-                          <td className="py-3.5 px-5 text-center font-semibold text-slate-400 text-xs">{globalIndex}</td>
-                          <td className="py-3.5 px-5 text-center font-bold text-slate-500 hidden sm:table-cell">{item.tahun}</td>
-                          <td className="py-3.5 px-5 font-bold text-slate-800 max-w-sm truncate" title={item.nama}>
-                            {item.nama}
-                          </td>
-                          <td className="py-3.5 px-5 capitalize hidden sm:table-cell">
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center font-semibold text-slate-400 text-xs">{globalIndex}</td>
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center font-bold text-slate-500 hidden sm:table-cell">{item.tahun}</td>
+                          <ExpandableTableCell nama={item.nama} />
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 capitalize hidden sm:table-cell">
                             <span className="inline-block bg-slate-50 text-slate-500 px-2.5 py-0.5 rounded-lg text-xs border border-slate-100 font-semibold">
                               {(item.map?.province_code === null ? 'lembaga' : item.map?.level) || 'lembaga'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-5 text-center">{getScoreStatusBadge(item.indeks)}</td>
-                          <td className="py-3.5 px-5 text-center">
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center">{getScoreStatusBadge(item.indeks)}</td>
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center">
                             <button
                               onClick={() => setSelectedItem(item)}
-                              className="text-xs font-bold text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1"
+                              className="text-xs font-bold text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 px-2 sm:px-3 py-1.5 rounded-lg transition-all cursor-pointer inline-flex items-center gap-1"
                             >
-                              <FiEye className="w-3.5 h-3.5" /> Detail
+                              <FiEye className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Detail</span>
                             </button>
                           </td>
                         </tr>

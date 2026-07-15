@@ -149,7 +149,7 @@ export default function InstitutionDetail({ item, onClose, allData = {}, fetchYe
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div
-        className="bg-white border border-slate-100 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl relative"
+        className="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -165,7 +165,7 @@ export default function InstitutionDetail({ item, onClose, allData = {}, fetchYe
           <span className="inline-block bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
             📂 {(item.map?.province_code === null ? 'lembaga' : item.map?.level) || 'lembaga'}
           </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+          <h2 className="text-xl md:text-3xl font-extrabold text-slate-900 leading-tight">
             {item.nama}
           </h2>
           <p className="text-sm font-semibold text-slate-400 mt-1">
