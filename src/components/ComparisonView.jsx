@@ -108,6 +108,28 @@ export default function ComparisonView({ currentYearData = [], onClose }) {
     return { text: 'Sama', color: 'text-slate-400' };
   };
 
+  const getIndeksColor = (valCurrent, valOpponent) => {
+    const current = parseFloat(valCurrent || 0);
+    const opponent = parseFloat(valOpponent || 0);
+    if (current > opponent) return 'text-emerald-600 font-black';
+    return 'text-slate-800 font-black';
+  };
+
+  const getScoreColor = (valCurrent, valOpponent) => {
+    const current = parseFloat(valCurrent || 0);
+    const opponent = parseFloat(valOpponent || 0);
+    if (current > opponent) return 'text-emerald-600 font-bold';
+    return 'text-slate-800 font-semibold';
+  };
+
+  const getDeductionColor = (valCurrent, valOpponent) => {
+    const current = parseFloat(valCurrent || 0);
+    const opponent = parseFloat(valOpponent || 0);
+    // Less deduction is better (closer to 0)
+    if (current < opponent) return 'text-emerald-600 font-bold';
+    return 'text-slate-800 font-medium';
+  };
+
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 mb-8 relative">
       <button
@@ -154,64 +176,64 @@ export default function ComparisonView({ currentYearData = [], onClose }) {
           <div className="divide-y divide-slate-100 p-4 md:p-6 space-y-4">
             {/* Indeks SPI */}
             <div className="grid grid-cols-3 items-center">
-              <div className="text-left font-black text-2xl md:text-3xl text-violet-700">{itemA.indeks}</div>
+              <div className={`text-left text-2xl md:text-3xl ${getIndeksColor(itemA.indeks, itemB.indeks)}`}>{itemA.indeks}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
                 <span className="block mb-1">INDEKS SPI</span>
                 <span className={getScoreDiff(itemA.indeks, itemB.indeks).color}>
                   {getScoreDiff(itemA.indeks, itemB.indeks).text}
                 </span>
               </div>
-              <div className="text-right font-black text-2xl md:text-3xl text-violet-700">{itemB.indeks}</div>
+              <div className={`text-right text-2xl md:text-3xl ${getIndeksColor(itemB.indeks, itemA.indeks)}`}>{itemB.indeks}</div>
             </div>
 
             {/* Internal */}
             <div className="grid grid-cols-3 pt-3 items-center">
-              <div className="text-left font-semibold text-slate-700">{itemA.agregat?.internal || 0}</div>
+              <div className={`text-left ${getScoreColor(itemA.agregat?.internal, itemB.agregat?.internal)}`}>{itemA.agregat?.internal || 0}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
                 <span className="block mb-1">SKOR INTERNAL</span>
                 <span className={getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).color}>
                   {getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).text}
                 </span>
               </div>
-              <div className="text-right font-semibold text-slate-700">{itemB.agregat?.internal || 0}</div>
+              <div className={`text-right ${getScoreColor(itemB.agregat?.internal, itemA.agregat?.internal)}`}>{itemB.agregat?.internal || 0}</div>
             </div>
 
             {/* Eksternal */}
             <div className="grid grid-cols-3 pt-3 items-center">
-              <div className="text-left font-semibold text-slate-700">{itemA.agregat?.eksternal || 0}</div>
+              <div className={`text-left ${getScoreColor(itemA.agregat?.eksternal, itemB.agregat?.eksternal)}`}>{itemA.agregat?.eksternal || 0}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
                 <span className="block mb-1">SKOR EKSTERNAL</span>
                 <span className={getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).color}>
                   {getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).text}
                 </span>
               </div>
-              <div className="text-right font-semibold text-slate-700">{itemB.agregat?.eksternal || 0}</div>
+              <div className={`text-right ${getScoreColor(itemB.agregat?.eksternal, itemA.agregat?.eksternal)}`}>{itemB.agregat?.eksternal || 0}</div>
             </div>
 
             {/* Eksper */}
             <div className="grid grid-cols-3 pt-3 items-center">
-              <div className="text-left font-semibold text-slate-700">{itemA.agregat?.eksper || 0}</div>
+              <div className={`text-left ${getScoreColor(itemA.agregat?.eksper, itemB.agregat?.eksper)}`}>{itemA.agregat?.eksper || 0}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
                 <span className="block mb-1">SKOR EKSPER</span>
                 <span className={getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).color}>
                   {getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).text}
                 </span>
               </div>
-              <div className="text-right font-semibold text-slate-700">{itemB.agregat?.eksper || 0}</div>
+              <div className={`text-right ${getScoreColor(itemB.agregat?.eksper, itemA.agregat?.eksper)}`}>{itemB.agregat?.eksper || 0}</div>
             </div>
 
             {/* Koreksi Integritas */}
             <div className="grid grid-cols-3 pt-3 items-center">
-              <div className="text-left font-medium text-rose-600">-{itemA.koreksi?.integritas || 0}</div>
+              <div className={`text-left ${getDeductionColor(itemA.koreksi?.integritas, itemB.koreksi?.integritas)}`}>-{itemA.koreksi?.integritas || 0}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">KOREKSI INTEGRITAS</div>
-              <div className="text-right font-medium text-rose-600">-{itemB.koreksi?.integritas || 0}</div>
+              <div className={`text-right ${getDeductionColor(itemB.koreksi?.integritas, itemA.koreksi?.integritas)}`}>-{itemB.koreksi?.integritas || 0}</div>
             </div>
 
             {/* Koreksi Prevalensi */}
             <div className="grid grid-cols-3 pt-3 items-center">
-              <div className="text-left font-medium text-amber-600">-{itemA.koreksi?.prevalensi || 0}</div>
+              <div className={`text-left ${getDeductionColor(itemA.koreksi?.prevalensi, itemB.koreksi?.prevalensi)}`}>-{itemA.koreksi?.prevalensi || 0}</div>
               <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">KOREKSI PREVALENSI</div>
-              <div className="text-right font-medium text-amber-600">-{itemB.koreksi?.prevalensi || 0}</div>
+              <div className={`text-right ${getDeductionColor(itemB.koreksi?.prevalensi, itemA.koreksi?.prevalensi)}`}>-{itemB.koreksi?.prevalensi || 0}</div>
             </div>
           </div>
         </div>
