@@ -39,7 +39,8 @@ function InstansiSearch({ label, value, onChange, data, excludeValue }) {
           onChange={(e) => { setInputVal(e.target.value); setOpen(true); if (!e.target.value) onChange(''); }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 180)}
-          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition-all"
+          // text-base (16px) on mobile prevents iOS keyboard zoom, sm:text-sm restores size on desktop
+          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition-all"
         />
         {inputVal && (
           <button
@@ -167,73 +168,143 @@ export default function ComparisonView({ currentYearData = [], onClose }) {
       {/* Comparison Grid */}
       {itemA && itemB ? (
         <div className="border border-slate-200 rounded-2xl bg-white shadow-xs overflow-hidden">
-          <div className="grid grid-cols-3 gap-4 bg-slate-50/50 border-b border-slate-200 p-4 items-center">
-            <div className="col-span-1 font-bold text-slate-800 text-xs md:text-sm text-left break-words">{itemA.nama}</div>
-            <div className="col-span-1 font-bold text-slate-400 text-center text-[10px] tracking-widest uppercase">Komparasi</div>
-            <div className="col-span-1 font-bold text-slate-800 text-xs md:text-sm text-right break-words">{itemB.nama}</div>
+          <div className="grid grid-cols-3 gap-2 md:gap-4 bg-slate-50/50 border-b border-slate-200 p-4 items-center">
+            <div className="col-span-1 font-bold text-slate-800 text-xs md:text-sm text-left truncate break-words" title={itemA.nama}>{itemA.nama}</div>
+            <div className="col-span-1 font-bold text-slate-400 text-center text-[10px] tracking-widest uppercase">VS</div>
+            <div className="col-span-1 font-bold text-slate-800 text-xs md:text-sm text-right truncate break-words" title={itemB.nama}>{itemB.nama}</div>
           </div>
 
           <div className="divide-y divide-slate-100 p-4 md:p-6 space-y-4">
             {/* Indeks SPI */}
-            <div className="grid grid-cols-3 items-center">
-              <div className={`text-left text-2xl md:text-3xl ${getIndeksColor(itemA.indeks, itemB.indeks)}`}>{itemA.indeks}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
-                <span className="block mb-1">INDEKS SPI</span>
-                <span className={getScoreDiff(itemA.indeks, itemB.indeks).color}>
-                  {getScoreDiff(itemA.indeks, itemB.indeks).text}
-                </span>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">INDEKS SPI</span>
               </div>
-              <div className={`text-right text-2xl md:text-3xl ${getIndeksColor(itemB.indeks, itemA.indeks)}`}>{itemB.indeks}</div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-lg sm:text-2xl md:text-3xl ${getIndeksColor(itemA.indeks, itemB.indeks)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  {itemA.indeks}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemA.indeks, itemB.indeks).color}`}>
+                    {getScoreDiff(itemA.indeks, itemB.indeks).text}
+                  </span>
+                </div>
+                <div className={`text-right text-lg sm:text-2xl md:text-3xl ${getIndeksColor(itemB.indeks, itemA.indeks)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  {itemB.indeks}
+                </div>
+              </div>
             </div>
 
             {/* Internal */}
-            <div className="grid grid-cols-3 pt-3 items-center">
-              <div className={`text-left ${getScoreColor(itemA.agregat?.internal, itemB.agregat?.internal)}`}>{itemA.agregat?.internal || 0}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
-                <span className="block mb-1">SKOR INTERNAL</span>
-                <span className={getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).color}>
-                  {getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).text}
-                </span>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">SKOR INTERNAL</span>
               </div>
-              <div className={`text-right ${getScoreColor(itemB.agregat?.internal, itemA.agregat?.internal)}`}>{itemB.agregat?.internal || 0}</div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-base sm:text-lg ${getScoreColor(itemA.agregat?.internal, itemB.agregat?.internal)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  {itemA.agregat?.internal || 0}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).color}`}>
+                    {getScoreDiff(itemA.agregat?.internal, itemB.agregat?.internal).text}
+                  </span>
+                </div>
+                <div className={`text-right text-base sm:text-lg ${getScoreColor(itemB.agregat?.internal, itemA.agregat?.internal)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  {itemB.agregat?.internal || 0}
+                </div>
+              </div>
             </div>
 
             {/* Eksternal */}
-            <div className="grid grid-cols-3 pt-3 items-center">
-              <div className={`text-left ${getScoreColor(itemA.agregat?.eksternal, itemB.agregat?.eksternal)}`}>{itemA.agregat?.eksternal || 0}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
-                <span className="block mb-1">SKOR EKSTERNAL</span>
-                <span className={getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).color}>
-                  {getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).text}
-                </span>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">SKOR EKSTERNAL</span>
               </div>
-              <div className={`text-right ${getScoreColor(itemB.agregat?.eksternal, itemA.agregat?.eksternal)}`}>{itemB.agregat?.eksternal || 0}</div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-base sm:text-lg ${getScoreColor(itemA.agregat?.eksternal, itemB.agregat?.eksternal)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  {itemA.agregat?.eksternal || 0}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).color}`}>
+                    {getScoreDiff(itemA.agregat?.eksternal, itemB.agregat?.eksternal).text}
+                  </span>
+                </div>
+                <div className={`text-right text-base sm:text-lg ${getScoreColor(itemB.agregat?.eksternal, itemA.agregat?.eksternal)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  {itemB.agregat?.eksternal || 0}
+                </div>
+              </div>
             </div>
 
             {/* Eksper */}
-            <div className="grid grid-cols-3 pt-3 items-center">
-              <div className={`text-left ${getScoreColor(itemA.agregat?.eksper, itemB.agregat?.eksper)}`}>{itemA.agregat?.eksper || 0}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">
-                <span className="block mb-1">SKOR EKSPER</span>
-                <span className={getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).color}>
-                  {getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).text}
-                </span>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">SKOR EKSPER</span>
               </div>
-              <div className={`text-right ${getScoreColor(itemB.agregat?.eksper, itemA.agregat?.eksper)}`}>{itemB.agregat?.eksper || 0}</div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-base sm:text-lg ${getScoreColor(itemA.agregat?.eksper, itemB.agregat?.eksper)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  {itemA.agregat?.eksper || 0}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).color}`}>
+                    {getScoreDiff(itemA.agregat?.eksper, itemB.agregat?.eksper).text}
+                  </span>
+                </div>
+                <div className={`text-right text-base sm:text-lg ${getScoreColor(itemB.agregat?.eksper, itemA.agregat?.eksper)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  {itemB.agregat?.eksper || 0}
+                </div>
+              </div>
             </div>
 
             {/* Koreksi Integritas */}
-            <div className="grid grid-cols-3 pt-3 items-center">
-              <div className={`text-left ${getDeductionColor(itemA.koreksi?.integritas, itemB.koreksi?.integritas)}`}>-{itemA.koreksi?.integritas || 0}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">KOREKSI INTEGRITAS</div>
-              <div className={`text-right ${getDeductionColor(itemB.koreksi?.integritas, itemA.koreksi?.integritas)}`}>-{itemB.koreksi?.integritas || 0}</div>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">KOREKSI INTEGRITAS</span>
+              </div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-base ${getDeductionColor(itemA.koreksi?.integritas, itemB.koreksi?.integritas)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  -{itemA.koreksi?.integritas || 0}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemB.koreksi?.integritas, itemA.koreksi?.integritas).color.replace('A Unggul', 'A Lebih Baik').replace('B Unggul', 'B Lebih Baik')}`}>
+                    {getScoreDiff(itemB.koreksi?.integritas, itemA.koreksi?.integritas).text.replace('A Unggul', 'A Lebih Baik').replace('B Unggul', 'B Lebih Baik')}
+                  </span>
+                </div>
+                <div className={`text-right text-base ${getDeductionColor(itemB.koreksi?.integritas, itemA.koreksi?.integritas)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  -{itemB.koreksi?.integritas || 0}
+                </div>
+              </div>
             </div>
 
             {/* Koreksi Prevalensi */}
-            <div className="grid grid-cols-3 pt-3 items-center">
-              <div className={`text-left ${getDeductionColor(itemA.koreksi?.prevalensi, itemB.koreksi?.prevalensi)}`}>-{itemA.koreksi?.prevalensi || 0}</div>
-              <div className="text-center text-[10px] font-bold text-slate-400 tracking-wider">KOREKSI PREVALENSI</div>
-              <div className={`text-right ${getDeductionColor(itemB.koreksi?.prevalensi, itemA.koreksi?.prevalensi)}`}>-{itemB.koreksi?.prevalensi || 0}</div>
+            <div className="py-3 flex flex-col sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 gap-2">
+              <div className="text-center sm:col-start-2 sm:order-2">
+                <span className="block text-[10px] font-bold text-slate-400 tracking-wider uppercase">KOREKSI PREVALENSI</span>
+              </div>
+              <div className="flex justify-between items-center sm:contents sm:order-1">
+                <div className={`text-left text-base ${getDeductionColor(itemA.koreksi?.prevalensi, itemB.koreksi?.prevalensi)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">A</span>
+                  -{itemA.koreksi?.prevalensi || 0}
+                </div>
+                <div className="sm:col-start-2 flex justify-center text-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-lg ${getScoreDiff(itemB.koreksi?.prevalensi, itemA.koreksi?.prevalensi).color.replace('A Unggul', 'A Lebih Baik').replace('B Unggul', 'B Lebih Baik')}`}>
+                    {getScoreDiff(itemB.koreksi?.prevalensi, itemA.koreksi?.prevalensi).text.replace('A Unggul', 'A Lebih Baik').replace('B Unggul', 'B Lebih Baik')}
+                  </span>
+                </div>
+                <div className={`text-right text-base ${getDeductionColor(itemB.koreksi?.prevalensi, itemA.koreksi?.prevalensi)}`}>
+                  <span className="text-[9px] font-semibold text-slate-400 sm:hidden block uppercase mb-0.5">B</span>
+                  -{itemB.koreksi?.prevalensi || 0}
+                </div>
+              </div>
             </div>
           </div>
         </div>

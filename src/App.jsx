@@ -435,7 +435,7 @@ function App() {
                 const val = e.target.value;
                 setSelectedYear(val === 'all' ? 'all' : Number(val));
               }}
-              className="w-full sm:w-48 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 cursor-pointer transition-all appearance-none"
+              className="w-full sm:w-48 bg-white border border-slate-200 rounded-xl px-4 py-2 text-base sm:text-xs font-bold text-slate-700 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 cursor-pointer transition-all appearance-none"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
             >
               {[2021, 2022, 2023, 2024, 2025].map(y => (
@@ -519,7 +519,7 @@ function App() {
                   onChange={(e) => { setSearchInputValue(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 w-full"
+                  className="bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 w-full"
                 />
                 {/* Suggestions */}
                 {showSuggestions && suggestions.length > 0 && (
@@ -565,7 +565,7 @@ function App() {
                   <select
                     value={selectedLevel}
                     onChange={(e) => setSelectedLevel(e.target.value)}
-                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize"
+                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize"
                   >
                     {availableLevels.map(lvl => (
                       <option key={lvl} value={lvl}>{lvl === 'all' ? 'Semua Kategori' : lvl}</option>
@@ -575,7 +575,7 @@ function App() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
                 >
                   <option value="indeks-desc">↓ Skor Tertinggi</option>
                   <option value="indeks-asc">↑ Skor Terendah</option>
@@ -599,7 +599,7 @@ function App() {
                   <select
                     value={selectedLevel}
                     onChange={(e) => setSelectedLevel(e.target.value)}
-                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize w-full"
+                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize w-full"
                   >
                     {availableLevels.map(lvl => (
                       <option key={lvl} value={lvl}>{lvl === 'all' ? 'Semua Kategori' : lvl}</option>
@@ -609,7 +609,7 @@ function App() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full"
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full"
                 >
                   <option value="indeks-desc">↓ Urutkan: Skor Tertinggi</option>
                   <option value="indeks-asc">↑ Urutkan: Skor Terendah</option>
@@ -705,7 +705,7 @@ function App() {
                     <select
                       value={pageSize}
                       onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); setPageInputValue('1'); }}
-                      className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none cursor-pointer"
+                      className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-base sm:text-xs focus:outline-none cursor-pointer"
                     >
                       {[10, 25, 50, 100].map(size => (
                         <option key={size} value={size}>{size}</option>
@@ -743,7 +743,7 @@ function App() {
                             e.target.blur();
                           }
                         }}
-                        className="w-10 sm:w-12 text-center border border-slate-200 rounded-lg py-1 text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 transition-all"
+                        className="w-10 sm:w-12 text-center border border-slate-200 rounded-lg py-1 text-base sm:text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-200 transition-all"
                       />
                       <span className="text-xs text-slate-400 font-semibold">/ {totalPages}</span>
                     </div>
