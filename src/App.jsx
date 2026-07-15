@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import MetricCard from './components/MetricCard';
 import InstitutionDetail from './components/InstitutionDetail';
 import ComparisonView from './components/ComparisonView';
@@ -25,6 +25,27 @@ function App() {
   const [showCompare, setShowCompare] = useState(false);
   const [yearLoading, setYearLoading] = useState(false);
   const [showDownloadDropdown, setShowDownloadDropdown] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const compareRef = useRef(null);
+  const controlsRef = useRef(null);
+
+  const handleToggleCompare = (forceNextState) => {
+    const next = forceNextState !== undefined ? forceNextState : !showCompare;
+    setShowCompare(next);
+    
+    if (!next) {
+      // When closing, wait for layout to collapse then scroll controls back to top of viewport
+      setTimeout(() => {
+        controlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    } else {
+      // When opening, bring filter bar into view, then comparison card
+      controlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        compareRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 350);
+    }
+  };
 
   // Debounce search query
   useEffect(() => {
@@ -482,38 +503,32 @@ function App() {
             />
           </div>
 
-          {/* Controls Panel */}
-          <div className="bg-white border border-slate-100 rounded-2xl p-5 mb-6 shadow-xs flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              {/* Search input with React icon */}
-              <div className="relative w-full sm:w-80">
-                <div className="relative flex items-center">
-                  <FiSearch className="absolute left-3.5 text-slate-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Cari nama instansi..."
-                    value={searchInputValue}
-                    onChange={(e) => {
-                      setSearchInputValue(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-xs w-full"
-                  />
-                </div>
+          {/* Controls Panel — sticky, compact on mobile */}
+          <div ref={controlsRef} className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border border-slate-100 rounded-2xl mb-6 shadow-sm transition-shadow">
 
-                {/* Suggestions List Popover */}
+            {/* ── Always-visible row ── */}
+            <div className="flex items-center gap-2 p-3 sm:p-4 sm:gap-3">
+
+              {/* Search */}
+              <div className="relative flex-1 min-w-0">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
+                <input
+                  type="text"
+                  placeholder="Cari instansi..."
+                  value={searchInputValue}
+                  onChange={(e) => { setSearchInputValue(e.target.value); setShowSuggestions(true); }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 w-full"
+                />
+                {/* Suggestions */}
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute left-0 mt-2 w-full bg-white border border-slate-100 rounded-xl shadow-lg z-30 max-h-60 overflow-y-auto py-1">
+                  <div className="absolute left-0 top-full mt-1 w-full bg-white border border-slate-100 rounded-xl shadow-lg z-30 max-h-56 overflow-y-auto py-1">
                     {suggestions.map((item, idx) => (
                       <button
                         key={`suggestion-${idx}`}
                         type="button"
-                        onClick={() => {
-                          setSearchInputValue(item);
-                          setShowSuggestions(false);
-                        }}
+                        onClick={() => { setSearchInputValue(item); setShowSuggestions(false); }}
                         className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer block truncate"
                       >
                         {item}
@@ -523,52 +538,96 @@ function App() {
                 )}
               </div>
 
-              {/* Filter Level Dropdown */}
-              <div className="relative flex items-center">
-                <FiFilter className="absolute left-3.5 text-slate-400 w-4 h-4" />
-                <select
-                  value={selectedLevel}
-                  onChange={(e) => setSelectedLevel(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-xs cursor-pointer capitalize w-full"
+              {/* Mobile: filter toggle + compare button */}
+              <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+                <button
+                  onClick={() => setShowMobileFilters(v => !v)}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${showMobileFilters ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-slate-200 text-slate-600'}`}
                 >
-                  {availableLevels.map(lvl => (
-                    <option key={lvl} value={lvl}>
-                      {lvl === 'all' ? 'Semua Kategori' : lvl}
-                    </option>
-                  ))}
-                </select>
+                  <FiFilter className="w-3.5 h-3.5" />
+                  {/* Active filter indicator dot */}
+                  {(selectedLevel !== 'all' || sortBy !== 'indeks-desc') && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 inline-block" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleToggleCompare()}
+                  className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${showCompare ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-slate-200 text-slate-600'}`}
+                >
+                  ⚖️
+                </button>
               </div>
 
-              {/* Sort By Selector */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 shadow-xs cursor-pointer w-full sm:w-auto"
-              >
-                <option value="indeks-desc">Urutkan: Skor Tertinggi</option>
-                <option value="indeks-asc">Urutkan: Skor Terendah</option>
-                <option value="nama-asc">Urutkan: Nama (A-Z)</option>
-                <option value="nama-desc">Urutkan: Nama (Z-A)</option>
-              </select>
+              {/* Desktop sm+: inline dropdowns + compare */}
+              <div className="hidden sm:flex items-center gap-2 shrink-0">
+                <div className="relative flex items-center">
+                  <FiFilter className="absolute left-3 text-slate-400 w-3.5 h-3.5" />
+                  <select
+                    value={selectedLevel}
+                    onChange={(e) => setSelectedLevel(e.target.value)}
+                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize"
+                  >
+                    {availableLevels.map(lvl => (
+                      <option key={lvl} value={lvl}>{lvl === 'all' ? 'Semua Kategori' : lvl}</option>
+                    ))}
+                  </select>
+                </div>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
+                >
+                  <option value="indeks-desc">↓ Skor Tertinggi</option>
+                  <option value="indeks-asc">↑ Skor Terendah</option>
+                  <option value="nama-asc">A–Z Nama</option>
+                  <option value="nama-desc">Z–A Nama</option>
+                </select>
+                <button
+                  onClick={() => handleToggleCompare()}
+                  className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${showCompare ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                >
+                  ⚖️ {showCompare ? 'Tutup' : 'Bandingkan'}
+                </button>
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 w-full lg:w-auto justify-end">
-              <button
-                onClick={() => setShowCompare(!showCompare)}
-                className={`btn-secondary text-xs ${showCompare ? 'bg-violet-50 border-violet-200 text-violet-700 font-bold' : ''}`}
-              >
-                ⚖️ {showCompare ? 'Tutup Perbandingan' : 'Bandingkan Instansi'}
-              </button>
-            </div>
+            {/* ── Mobile expandable filter row ── */}
+            {showMobileFilters && (
+              <div className="sm:hidden border-t border-slate-100 px-3 pb-3 pt-2 flex flex-col gap-2">
+                <div className="relative flex items-center">
+                  <FiFilter className="absolute left-3 text-slate-400 w-3.5 h-3.5" />
+                  <select
+                    value={selectedLevel}
+                    onChange={(e) => setSelectedLevel(e.target.value)}
+                    className="bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer capitalize w-full"
+                  >
+                    {availableLevels.map(lvl => (
+                      <option key={lvl} value={lvl}>{lvl === 'all' ? 'Semua Kategori' : lvl}</option>
+                    ))}
+                  </select>
+                </div>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full"
+                >
+                  <option value="indeks-desc">↓ Urutkan: Skor Tertinggi</option>
+                  <option value="indeks-asc">↑ Urutkan: Skor Terendah</option>
+                  <option value="nama-asc">A–Z Nama</option>
+                  <option value="nama-desc">Z–A Nama</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* VS Mode Panel */}
           {showCompare && (
-            <ComparisonView 
-              currentYearData={currentYearData} 
-              onClose={() => setShowCompare(false)} 
-            />
+            <div ref={compareRef} className="scroll-mt-20">
+              <ComparisonView
+                currentYearData={currentYearData}
+                onClose={() => handleToggleCompare(false)}
+              />
+            </div>
           )}
 
           {/* Modern SaaS Table */}
@@ -704,12 +763,29 @@ function App() {
         </>
       )}
 
+      {/* Footer / Copyright */}
+      <footer className="mt-12 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+        <p className="font-semibold">
+          &copy; {new Date().getFullYear()} Dashboard Evaluasi Integritas Nasional (SPI).
+        </p>
+        <p className="mt-1.5 font-medium text-slate-400">
+          Butuh bantuan?{' '}
+          <a
+            href="mailto:daffaariftamareal@gmail.com?subject=Tanya%20Seputar%20Dashboard%20SPI"
+            className="text-violet-600 hover:text-violet-800 font-bold hover:underline transition-colors"
+          >
+            Klik di sini untuk mengirim email
+          </a>
+        </p>
+      </footer>
+
       {/* Detail Modal Overlay */}
       {selectedItem && (
         <InstitutionDetail 
           item={selectedItem} 
           onClose={() => setSelectedItem(null)} 
           allData={allData}
+          fetchYear={fetchYear}
         />
       )}
     </div>
