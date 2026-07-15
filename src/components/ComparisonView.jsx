@@ -92,31 +92,6 @@ function InstansiSearch({ label, value, onChange, data, excludeValue }) {
   );
 }
 
-// ── Click-to-Expand / Release-to-Collapse Component ──────────────────────────
-function ExpandableComparisonName({ nama, className = '', label }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
-      }}
-      onMouseLeave={() => setIsExpanded(false)}
-      className={`cursor-pointer select-none transition-all ${
-        isExpanded 
-          ? 'max-w-none whitespace-normal break-words bg-violet-100/30 px-2 py-1 rounded-lg text-slate-800 shadow-xs' 
-          : 'truncate'
-      } ${className}`}
-      title={nama}
-    >
-      <span className="inline-block sm:hidden bg-violet-100 text-violet-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded mr-1.5">
-        {label}
-      </span>
-      {nama}
-    </div>
-  );
-}
-
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function ComparisonView({ currentYearData = [], onClose }) {
   const [selectA, setSelectA] = useState('');
@@ -194,20 +169,18 @@ export default function ComparisonView({ currentYearData = [], onClose }) {
       {itemA && itemB ? (
         <div className="border border-slate-200 rounded-2xl bg-white shadow-xs overflow-hidden">
           <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2 md:gap-4 bg-slate-50/50 border-b border-slate-200 p-4 items-center min-w-0">
-            <ExpandableComparisonName
-              nama={itemA.nama}
-              label="A"
-              className="font-bold text-slate-800 text-xs md:text-sm text-center sm:text-left w-full"
-            />
+            <div className="font-bold text-slate-800 text-xs md:text-sm text-center sm:text-left break-words whitespace-normal w-full" title={itemA.nama}>
+              <span className="inline-block sm:hidden bg-violet-100 text-violet-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded mr-1.5">A</span>
+              {itemA.nama}
+            </div>
             <div className="font-bold text-slate-400 text-center text-[10px] tracking-widest uppercase py-0.5 sm:py-0">
               <span className="sm:inline hidden">VS</span>
               <span className="sm:hidden inline text-slate-300">dengan</span>
             </div>
-            <ExpandableComparisonName
-              nama={itemB.nama}
-              label="B"
-              className="font-bold text-slate-800 text-xs md:text-sm text-center sm:text-right w-full"
-            />
+            <div className="font-bold text-slate-800 text-xs md:text-sm text-center sm:text-right break-words whitespace-normal w-full" title={itemB.nama}>
+              <span className="inline-block sm:hidden bg-violet-100 text-violet-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded mr-1.5">B</span>
+              {itemB.nama}
+            </div>
           </div>
 
           <div className="divide-y divide-slate-100 p-4 md:p-6 space-y-4">

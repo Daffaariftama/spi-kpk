@@ -13,49 +13,6 @@ import {
   FiEye
 } from 'react-icons/fi';
 
-// ── Click-to-Expand / Release-to-Collapse Components ─────────────────────────
-function ExpandableTableCell({ nama }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  return (
-    <td 
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
-      }}
-      onMouseLeave={() => setIsExpanded(false)}
-      className={`py-2.5 sm:py-3.5 px-2.5 sm:px-5 font-bold text-slate-800 cursor-pointer select-none transition-all ${
-        isExpanded 
-          ? 'max-w-none break-words whitespace-normal bg-violet-50/50 ring-1 ring-violet-100 rounded-lg shadow-inner' 
-          : 'max-w-[120px] sm:max-w-sm truncate'
-      }`}
-      title={nama}
-    >
-      {nama}
-    </td>
-  );
-}
-
-function ExpandableText({ text, className = '' }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  return (
-    <span
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
-      }}
-      onMouseLeave={() => setIsExpanded(false)}
-      className={`cursor-pointer select-none transition-all block ${
-        isExpanded 
-          ? 'max-w-none whitespace-normal break-words bg-slate-100 px-1 py-0.5 rounded text-[9px] text-slate-700 font-semibold shadow-xs' 
-          : 'truncate max-w-full'
-      } ${className}`}
-      title={text}
-    >
-      {text}
-    </span>
-  );
-}
-
 function App() {
   const [allData, setAllData] = useState({ 2021: null, 2022: null, 2023: null, 2024: null, 2025: null });
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -499,12 +456,12 @@ function App() {
               <div className="min-w-0 border-b border-slate-100/50 pb-3 pl-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Skor Tertinggi</span>
                 <span className="text-lg font-extrabold text-emerald-600">🏆 {stats.highest?.indeks || 0}</span>
-                <ExpandableText text={stats.highest?.nama || ''} className="text-[8px] font-medium text-slate-400" />
+                <span className="text-[8px] font-medium text-slate-400 block mt-0.5 break-words whitespace-normal">{stats.highest?.nama}</span>
               </div>
               <div className="min-w-0 border-r border-slate-100/50 pt-3 pr-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Skor Terendah</span>
                 <span className="text-lg font-extrabold text-rose-600">🚧 {stats.lowest?.indeks || 0}</span>
-                <ExpandableText text={stats.lowest?.nama || ''} className="text-[8px] font-medium text-slate-400" />
+                <span className="text-[8px] font-medium text-slate-400 block mt-0.5 break-words whitespace-normal">{stats.lowest?.nama}</span>
               </div>
               <div className="min-w-0 pt-3 pl-2 text-left">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Total Lembaga</span>
@@ -704,7 +661,9 @@ function App() {
                         >
                           <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center font-semibold text-slate-400 text-xs">{globalIndex}</td>
                           <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 text-center font-bold text-slate-500 hidden sm:table-cell">{item.tahun}</td>
-                          <ExpandableTableCell nama={item.nama} />
+                          <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 font-bold text-slate-800 break-words whitespace-normal max-w-[120px] sm:max-w-sm" title={item.nama}>
+                            {item.nama}
+                          </td>
                           <td className="py-2.5 sm:py-3.5 px-2.5 sm:px-5 capitalize hidden sm:table-cell">
                             <span className="inline-block bg-slate-50 text-slate-500 px-2.5 py-0.5 rounded-lg text-xs border border-slate-100 font-semibold">
                               {(item.map?.province_code === null ? 'lembaga' : item.map?.level) || 'lembaga'}
